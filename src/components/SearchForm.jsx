@@ -1,13 +1,12 @@
 import React, { Component } from "react";
 import UserCardList from "./UserCardList";
 
-class SearchForm extends React.Component {
+class SearchForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            username: 'tchilds11',
+            username: "",
             user: [],
-            isLoading: false
         };
     }
 
@@ -17,46 +16,40 @@ class SearchForm extends React.Component {
         });
     };
 
-    _handleClick = async (event) => {
+    _handleSubmit = async (event) => {
         event.preventDefault();
-        const {username} = this.state;
-        const userData = await this._fetchUser;
+        const { username } = this.state;
+        const userData = await GetData(`https://api.github.com/users/${ username }`);
         this.setState({
             user: [...this.state.user, userData],
             userName: "",
     })}
 
-    _fetchUser = () => {
-        this.setState({
-            isLoading: true,
-        }, () => {
-            const url = 'https://api.github.com/users/tchilds11';
-            fetch(url)
-                .then(response => response.json())
-                .then(userJson => {
-                    this.setState({
-                        user: userJson.value,
-                        isLoading: false
-                    }, () => {
-                        console.log('New user stored');
-                        
-                    });
-                })
-        })
-    }
     
     render() {
         const { username } = this.state;
         return (
+            <div>
             <>
-            <form class="input-group mb-3">
-                <input type="text" value={this.state.username} class="form-control" placeholder="Github Username" aria-label="Github username" aria-describedby="button-addon2"></input>
-                <button type="button" onClick={this._handleClick}>Search</button>
+            <form>
+                <input type="text"
+                    value={username}
+                    placeholder="Github Username" onChange={(event) => {
+                        this._handleChange(event.target.value);
+                      }}
+                    />
+                <button type="submit" onClick={this._handleSubmit}>Search</button>
             </form>
             <UserCardList users={this.state.user} />
             </>
+            </div>
         );
     }
 }
 
+const GetData = async (url) => {
+    const response = await fetch(url);
+    const data = response.json();
+    return data;
+}    
 export default SearchForm;
